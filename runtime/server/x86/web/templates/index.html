@@ -44,8 +44,8 @@
         <div class="voice-container">
           <div class="voice-input">
             <span>WebSocket URL：</span>
-            <input type="text" id="socketUrl" class="websocket-url" value="ws://127.0.0.1:10086"
-              placeholder="请输入服务器地址，如：ws://127.0.0.1:10086">
+            <input type="text" id="socketUrl" class="websocket-url" value="ws://10.33.10.8:10086"
+              placeholder="请输入服务器地址，如：ws://10.33.10.8:10086">
             <div class="start-voice">
               <button type="primary" id="beginBtn" class="voice-btn">
                 <span class="fa fa-microphone"> 开始识别</span>
@@ -177,7 +177,7 @@
       // Check socket url
       var socketUrl = $('#socketUrl').val()
       if (!socketUrl.trim()) {
-        alert('请输入 WebSocket 服务器地址，如：ws://127.0.0.1:10086')
+        alert('请输入 WebSocket 服务器地址，如：ws://10.33.10.8:10086')
         $('#socketUrl').focus()
         return
       }
