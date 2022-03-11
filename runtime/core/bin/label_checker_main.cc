@@ -51,7 +51,7 @@ std::shared_ptr<fst::SymbolTable> MakeSymbolTableForFst(
   CHECK(isymbol_table != nullptr);
   auto osymbol_table = std::make_shared<fst::SymbolTable>();
   osymbol_table->AddSymbol("<eps>", 0);
-  CHECK_EQ(isymbol_table->Find("<blank>"), 0);
+  CHECK_EQ_THROW(isymbol_table->Find("<blank>"), 0);
   osymbol_table->AddSymbol("<blank>", 1);
   for (int i = 1; i < isymbol_table->NumSymbols(); i++) {
     std::string symbol = isymbol_table->Find(i);
@@ -68,8 +68,8 @@ void CompileCtcFst(std::shared_ptr<fst::SymbolTable> symbol_table,
   ofst->DeleteStates();
   int start = ofst->AddState();
   ofst->SetStart(start);
-  CHECK_EQ(symbol_table->Find("<eps>"), 0);
-  CHECK_EQ(symbol_table->Find("<blank>"), 1);
+  CHECK_EQ_THROW(symbol_table->Find("<eps>"), 0);
+  CHECK_EQ_THROW(symbol_table->Find("<blank>"), 1);
   ofst->AddArc(start, fst::StdArc(1, 0, 0.0, start));
   // Exclude kDeletion and kInsertion
   for (int i = 2; i < symbol_table->NumSymbols() - 3; i++) {
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
   while (std::getline(wav_is, line)) {
     std::vector<std::string> strs;
     wenet::SplitString(line, &strs);
-    CHECK_EQ(strs.size(), 2);
+    CHECK_EQ_THROW(strs.size(), 2);
     wav_table[strs[0]] = strs[1];
   }
 
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
         LOG(WARNING) << "Error in reading " << wav_table[key];
         continue;
       }
-      CHECK_EQ(wav_reader.sample_rate(), FLAGS_sample_rate);
+      CHECK_EQ_THROW(wav_reader.sample_rate(), FLAGS_sample_rate);
       auto feature_pipeline =
           std::make_shared<wenet::FeaturePipeline>(*feature_config);
       feature_pipeline->AcceptWaveform(std::vector<float>(

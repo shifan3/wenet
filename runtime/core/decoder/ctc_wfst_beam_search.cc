@@ -16,7 +16,7 @@ void DecodableTensorScaled::Reset() {
 }
 
 void DecodableTensorScaled::AcceptLoglikes(const torch::Tensor& logp) {
-  CHECK_EQ(logp.dim(), 1);
+  CHECK_EQ_THROW(logp.dim(), 1);
   ++num_frames_ready_;
   // TODO(Binbin Zhang): Avoid copy here
   logp_ = logp;
@@ -26,14 +26,14 @@ void DecodableTensorScaled::AcceptLoglikes(const torch::Tensor& logp) {
 
 float DecodableTensorScaled::LogLikelihood(int32 frame, int32 index) {
   CHECK(accessor_ != nullptr);
-  CHECK_GT(index, 0);
-  CHECK_LE(index, logp_.size(0));
-  CHECK_LT(frame, num_frames_ready_);
+  CHECK_GT_THROW(index, 0);
+  CHECK_LE_THROW(index, logp_.size(0));
+  CHECK_LT_THROW(frame, num_frames_ready_);
   return scale_ * (*accessor_)[index - 1];
 }
 
 bool DecodableTensorScaled::IsLastFrame(int32 frame) const {
-  CHECK_LT(frame, num_frames_ready_);
+  CHECK_LT_THROW(frame, num_frames_ready_);
   return done_ && (frame == num_frames_ready_ - 1);
 }
 
@@ -66,8 +66,8 @@ void CtcWfstBeamSearch::Reset() {
 }
 
 void CtcWfstBeamSearch::Search(const torch::Tensor& logp) {
-  CHECK_EQ(logp.dtype(), torch::kFloat);
-  CHECK_EQ(logp.dim(), 2);
+  CHECK_EQ_THROW(logp.dtype(), torch::kFloat);
+  CHECK_EQ_THROW(logp.dim(), 2);
   if (0 == logp.size(0)) {
     return;
   }

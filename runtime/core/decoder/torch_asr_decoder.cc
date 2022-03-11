@@ -145,7 +145,7 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
                        ->get_method("forward_encoder_chunk")(inputs)
                        .toTuple()
                        ->elements();
-    CHECK_EQ(outputs.size(), 4);
+    CHECK_EQ_THROW(outputs.size(), 4);
     torch::Tensor chunk_out = outputs[0].toTensor();
     subsampling_cache_ = outputs[1];
     elayers_output_cache_ = outputs[2];
@@ -196,7 +196,7 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
   const auto& times = searcher_->Times();
   result_.clear();
 
-  CHECK_EQ(hypotheses.size(), likelihood.size());
+  CHECK_EQ_THROW(hypotheses.size(), likelihood.size());
   for (size_t i = 0; i < hypotheses.size(); i++) {
     const std::vector<int>& hypothesis = hypotheses[i];
 
@@ -222,7 +222,7 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
     if (unit_table_ != nullptr && finish) {
       const std::vector<int>& input = inputs[i];
       const std::vector<int>& time_stamp = times[i];
-      CHECK_EQ(input.size(), time_stamp.size());
+      CHECK_EQ_THROW(input.size(), time_stamp.size());
       for (size_t j = 0; j < input.size(); j++) {
         std::string word = unit_table_->Find(input[j]);
         int start = j > 0 ? ((time_stamp[j - 1] + time_stamp[j]) / 2 *
@@ -307,8 +307,8 @@ void TorchAsrDecoder::AttentionRescoring() {
           ->elements();
   auto probs = outputs[0].toTensor();
   auto r_probs = outputs[1].toTensor();
-  CHECK_EQ(probs.size(0), num_hyps);
-  CHECK_EQ(probs.size(1), max_hyps_len);
+  CHECK_EQ_THROW(probs.size(0), num_hyps);
+  CHECK_EQ_THROW(probs.size(1), max_hyps_len);
   // Step 3: Compute rescoring score
   for (size_t i = 0; i < num_hyps; ++i) {
     const std::vector<int>& hyp = hypotheses[i];
@@ -319,8 +319,8 @@ void TorchAsrDecoder::AttentionRescoring() {
     float r_score = 0.0f;
     if (opts_.reverse_weight > 0) {
       // Right to left score
-      CHECK_EQ(r_probs.size(0), num_hyps);
-      CHECK_EQ(r_probs.size(1), max_hyps_len);
+      CHECK_EQ_THROW(r_probs.size(0), num_hyps);
+      CHECK_EQ_THROW(r_probs.size(1), max_hyps_len);
       std::vector<int> r_hyp(hyp.size());
       std::reverse_copy(hyp.begin(), hyp.end(), r_hyp.begin());
       // right to left decoder score

@@ -20,19 +20,19 @@ void TorchAsrModel::Read(const std::string& model_path, const int num_threads) {
   torch::NoGradGuard no_grad;
   module_->eval();
   torch::jit::IValue o1 = module_->run_method("subsampling_rate");
-  CHECK_EQ(o1.isInt(), true);
+  CHECK_EQ_THROW(o1.isInt(), true);
   subsampling_rate_ = o1.toInt();
   torch::jit::IValue o2 = module_->run_method("right_context");
-  CHECK_EQ(o2.isInt(), true);
+  CHECK_EQ_THROW(o2.isInt(), true);
   right_context_ = o2.toInt();
   torch::jit::IValue o3 = module_->run_method("sos_symbol");
-  CHECK_EQ(o3.isInt(), true);
+  CHECK_EQ_THROW(o3.isInt(), true);
   sos_ = o3.toInt();
   torch::jit::IValue o4 = module_->run_method("eos_symbol");
-  CHECK_EQ(o4.isInt(), true);
+  CHECK_EQ_THROW(o4.isInt(), true);
   eos_ = o4.toInt();
   torch::jit::IValue o5 = module_->run_method("is_bidirectional_decoder");
-  CHECK_EQ(o5.isBool(), true);
+  CHECK_EQ_THROW(o5.isBool(), true);
   is_bidirectional_decoder_ = o5.toBool();
 
   LOG(INFO) << "torch model info subsampling_rate " << subsampling_rate_
