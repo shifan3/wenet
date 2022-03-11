@@ -18,7 +18,7 @@ set(FETCHCONTENT_BASE_DIR ${fc_base})
 
 if(NOT MSVC)
   # Keep the same with openfst, -fPIC or -fpic
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -fPIC")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread -fPIC -O2")
 endif()
 
 # third_party: gflags
@@ -106,7 +106,7 @@ if(NOT MSVC)
   add_dependencies(openfst gflags glog)
   add_dependencies(utils openfst)
   link_directories(${openfst_PREFIX_DIR}/lib)
-  target_link_libraries(utils PUBLIC fst dl)
+  target_link_libraries(utils PUBLIC fst crypto ssl dl)
 else()
   execute_process(COMMAND bootstrap.bat WORKING_DIRECTORY ${boost_SOURCE_DIR})
   execute_process(COMMAND b2.exe WORKING_DIRECTORY ${boost_SOURCE_DIR})
