@@ -36,6 +36,7 @@ void CtcPrefixBeamSearch::Reset() {
   cur_hyps_[empty] = prefix_score;
   outputs_.emplace_back(empty);
   hypotheses_.emplace_back(empty);
+  times_.emplace_back(empty);
   likelihood_.emplace_back(prefix_score.total_score());
 }
 
