@@ -231,7 +231,9 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
     if (unit_table_ != nullptr && finish) {
       LOG(INFO) << "C5.1";
       const std::vector<int>& input = inputs[i];
+      LOG(INFO) << "C5.1.1";
       const std::vector<int>& time_stamp = times[i];
+      LOG(INFO) << "C5.1.2";
       CHECK_EQ_THROW(input.size(), time_stamp.size());
       LOG(INFO) << "C5.2";
       for (size_t j = 0; j < input.size(); j++) {
