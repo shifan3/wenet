@@ -17,6 +17,7 @@ void ContextGraph::BuildContextGraph(
     const std::vector<std::string>& query_contexts,
     const std::shared_ptr<fst::SymbolTable>& symbol_table) {
   CHECK(symbol_table != nullptr) << "Symbols table should not be nullptr!";
+  CHECK_THROW(symbol_table != nullptr);
   start_tag_id_ = symbol_table->AddSymbol("<context>");
   end_tag_id_ = symbol_table->AddSymbol("</context>");
   symbol_table_ = symbol_table;

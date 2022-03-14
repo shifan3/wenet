@@ -78,7 +78,7 @@ class Fbank {
           last_index = i;
         }
       }
-      CHECK(first_index != -1 && last_index >= first_index);
+      CHECK_THROW(first_index != -1 && last_index >= first_index);
       bins_[bin].first = first_index;
       int size = last_index + 1 - first_index;
       bins_[bin].second.resize(size);
@@ -127,7 +127,7 @@ class Fbank {
 
   // Apply povey window on data in place
   void Povey(std::vector<float>* data) const {
-    CHECK_GE(data->size(), povey_window_.size());
+    CHECK_GE_THROW(data->size(), povey_window_.size());
     for (size_t i = 0; i < povey_window_.size(); ++i) {
       (*data)[i] *= povey_window_[i];
     }

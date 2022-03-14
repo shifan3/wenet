@@ -36,6 +36,7 @@ void CtcPrefixBeamSearch::Reset() {
   cur_hyps_[empty] = prefix_score;
   outputs_.emplace_back(empty);
   hypotheses_.emplace_back(empty);
+  times_.emplace_back(empty);
   likelihood_.emplace_back(prefix_score.total_score());
 }
 
@@ -90,8 +91,8 @@ void CtcPrefixBeamSearch::UpdateHypotheses(
 // for how CTC prefix beam search works, and there is a simple graph demo in
 // it.
 void CtcPrefixBeamSearch::Search(const torch::Tensor& logp) {
-  CHECK_EQ(logp.dtype(), torch::kFloat);
-  CHECK_EQ(logp.dim(), 2);
+  CHECK_EQ_THROW(logp.dtype(), torch::kFloat);
+  CHECK_EQ_THROW(logp.dim(), 2);
   int first_beam_size = std::min(static_cast<int>(logp.size(1)),
                                  opts_.first_beam_size);
   for (int t = 0; t < logp.size(0); ++t, ++abs_time_step_) {
@@ -133,7 +134,7 @@ void CtcPrefixBeamSearch::Search(const torch::Tensor& logp) {
             if (next_score1.cur_token_prob < prob) {
               next_score1.cur_token_prob = prob;
               next_score1.times_ns = prefix_score.times_ns;
-              CHECK_GT(next_score1.times_ns.size(), 0);
+              CHECK_GT_THROW(next_score1.times_ns.size(), 0);
               next_score1.times_ns.back() = abs_time_step_;
             }
           }
@@ -200,8 +201,8 @@ void CtcPrefixBeamSearch::FinalizeSearch() { UpdateFinalContext(); }
 
 void CtcPrefixBeamSearch::UpdateFinalContext() {
   if (context_graph_ == nullptr) return;
-  CHECK_EQ(hypotheses_.size(), cur_hyps_.size());
-  CHECK_EQ(hypotheses_.size(), likelihood_.size());
+  CHECK_EQ_THROW(hypotheses_.size(), cur_hyps_.size());
+  CHECK_EQ_THROW(hypotheses_.size(), likelihood_.size());
   // We should backoff the context score/state when the context is
   // not fully matched at the last time.
   for (const auto& prefix : hypotheses_) {
@@ -214,7 +215,6 @@ void CtcPrefixBeamSearch::UpdateFinalContext() {
   std::vector<std::pair<std::vector<int>, PrefixScore>> arr(cur_hyps_.begin(),
                                                             cur_hyps_.end());
   std::sort(arr.begin(), arr.end(), PrefixScoreCompare);
-
   // Update cur_hyps_ and get new result
   UpdateHypotheses(arr);
 }

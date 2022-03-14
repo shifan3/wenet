@@ -49,7 +49,7 @@ void GrpcConnectionHandler::OnSpeechStart() {
 
 void GrpcConnectionHandler::OnSpeechEnd() {
   LOG(INFO) << "Recieved speech end signal";
-  CHECK(feature_pipeline_ != nullptr);
+  CHECK_THROW(feature_pipeline_ != nullptr);
   feature_pipeline_->set_input_finished();
   got_end_tag_ = true;
 }
@@ -86,8 +86,8 @@ void GrpcConnectionHandler::OnSpeechData() {
     pdata++;
   }
   VLOG(2) << "Recieved " << num_samples << " samples";
-  CHECK(feature_pipeline_ != nullptr);
-  CHECK(decoder_ != nullptr);
+  CHECK_THROW(feature_pipeline_ != nullptr);
+  CHECK_THROW(decoder_ != nullptr);
   feature_pipeline_->AcceptWaveform(pcm_data);
 }
 

@@ -106,7 +106,7 @@ std::shared_ptr<DecodeResource> InitDecodeResourceFromFlags() {
   if (!FLAGS_fst_path.empty()) {
     LOG(INFO) << "Reading fst " << FLAGS_fst_path;
     fst.reset(fst::Fst<fst::StdArc>::Read(FLAGS_fst_path));
-    CHECK(fst != nullptr);
+    CHECK_THROW(fst != nullptr);
   }
   resource->fst = fst;
 
@@ -120,7 +120,7 @@ std::shared_ptr<DecodeResource> InitDecodeResourceFromFlags() {
     LOG(INFO) << "Reading unit table " << FLAGS_unit_path;
     unit_table = std::shared_ptr<fst::SymbolTable>(
         fst::SymbolTable::ReadText(FLAGS_unit_path));
-    CHECK(unit_table != nullptr);
+    CHECK_THROW(unit_table != nullptr);
   } else if (fst == nullptr) {
     LOG(INFO) << "Use symbol table as unit table";
     unit_table = symbol_table;

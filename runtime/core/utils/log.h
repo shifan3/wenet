@@ -20,4 +20,34 @@
 // dynamically into the executable.
 #include "fst/log.h"
 
+
+class check_error : public std::runtime_error
+// BOOST_SYMBOL_VISIBLE is needed by GCC to ensure system_error thrown from a shared
+// library can be caught. See svn.boost.org/trac/boost/ticket/3697
+{
+public:
+    explicit check_error( const char* message )
+        : std::runtime_error(message) {}
+
+
+    virtual ~check_error() {}
+
+private:
+};
+
+#define CHECK_OP_THROW(var1, var2, OP, op) OP(var1, var2); \
+    if (!((var1) op (var2))) throw check_error("check fail: " #var1 " " #OP " " #var2)
+
+#define CHECK_THROW(cond) CHECK(cond); \
+    if (!(cond)) throw check_error("check fail: " #cond);
+
+
+#define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ, ==)
+#define CHECK_NE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_NE, !=)
+#define CHECK_LE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LE, <=)
+#define CHECK_LT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LT, <)
+#define CHECK_GE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GE, >=)
+#define CHECK_GT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GT, >)
+
+
 #endif  // UTILS_LOG_H_
