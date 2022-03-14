@@ -12,6 +12,7 @@
 
 #include "decoder/ctc_endpoint.h"
 #include "utils/timer.h"
+#include "utils/log.h"
 
 namespace wenet {
 
@@ -28,7 +29,7 @@ TorchAsrDecoder::TorchAsrDecoder(
       ctc_endpointer_(new CtcEndpoint(opts.ctc_endpoint_config)) {
   if (opts_.reverse_weight > 0) {
     // Check if model has a right to left decoder
-    CHECK(model_->is_bidirectional_decoder());
+    CHECK_THROW(model_->is_bidirectional_decoder());
   }
   if (nullptr == fst_) {
     searcher_.reset(new CtcPrefixBeamSearch(opts.ctc_prefix_search_opts,
@@ -104,6 +105,11 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
   // If not okay, that means we reach the end of the input
   if (!feature_pipeline_->Read(num_requried_frames, &chunk_feats)) {
     state = DecodeState::kEndFeats;
+    return state;
+  }
+  if (state == DecodeState::kEndFeats) {
+    LOG(INFO) << "read empty feats, stop decoding";
+    return state;
   }
 
   num_frames_in_current_chunk_ = chunk_feats.size();
@@ -145,7 +151,7 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
                        ->get_method("forward_encoder_chunk")(inputs)
                        .toTuple()
                        ->elements();
-    CHECK_EQ(outputs.size(), 4);
+    CHECK_EQ_THROW(outputs.size(), 4);
     torch::Tensor chunk_out = outputs[0].toTensor();
     subsampling_cache_ = outputs[1];
     elayers_output_cache_ = outputs[2];
@@ -176,7 +182,7 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
       // chunk_feats.size() > cached_feature_size_ here, and it's consistent
       // with our current model, refine it later if we have new model or
       // new requirements
-      CHECK(chunk_feats.size() >= cached_feature_size);
+      CHECK_THROW(chunk_feats.size() >= cached_feature_size);
       cached_feature_.resize(cached_feature_size);
       for (int i = 0; i < cached_feature_size; ++i) {
         cached_feature_[i] = std::move(
@@ -195,8 +201,7 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
   const auto& likelihood = searcher_->Likelihood();
   const auto& times = searcher_->Times();
   result_.clear();
-
-  CHECK_EQ(hypotheses.size(), likelihood.size());
+  CHECK_EQ_THROW(hypotheses.size(), likelihood.size());
   for (size_t i = 0; i < hypotheses.size(); i++) {
     const std::vector<int>& hypothesis = hypotheses[i];
 
@@ -213,7 +218,6 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
         path.sentence += (word);
       }
     }
-
     // TimeStamp is only supported in final result
     // TimeStamp of the output of CtcWfstBeamSearch may be inaccurate due to
     // various FST operations when building the decoding graph. So here we use
@@ -222,12 +226,12 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
     if (unit_table_ != nullptr && finish) {
       const std::vector<int>& input = inputs[i];
       const std::vector<int>& time_stamp = times[i];
-      CHECK_EQ(input.size(), time_stamp.size());
+      CHECK_EQ_THROW(input.size(), time_stamp.size());
       for (size_t j = 0; j < input.size(); j++) {
         std::string word = unit_table_->Find(input[j]);
         int start = j > 0 ? ((time_stamp[j - 1] + time_stamp[j]) / 2 *
                              frame_shift_in_ms())
-                          : 0;
+                          : 0;  
         int end = j < input.size() - 1 ? ((time_stamp[j] + time_stamp[j + 1]) /
                                           2 * frame_shift_in_ms())
                                        : offset_ * frame_shift_in_ms();
@@ -267,7 +271,6 @@ void TorchAsrDecoder::AttentionRescoring() {
   if (encoder_outs_.size() == 0) {
     return;
   }
-
   int sos = model_->sos();
   int eos = model_->eos();
   // Inputs() returns N-best input ids, which is the basic unit for rescoring
@@ -296,9 +299,9 @@ void TorchAsrDecoder::AttentionRescoring() {
       hyps_tensor[i][j + 1] = hyp[j];
     }
   }
-
   // Step 2: Forward attention decoder by hyps and corresponding encoder_outs_
   torch::Tensor encoder_out = torch::cat(encoder_outs_, 1);
+
   auto outputs =
       model_->torch_model()
           ->run_method("forward_attention_decoder", hyps_tensor, hyps_length,
@@ -307,8 +310,8 @@ void TorchAsrDecoder::AttentionRescoring() {
           ->elements();
   auto probs = outputs[0].toTensor();
   auto r_probs = outputs[1].toTensor();
-  CHECK_EQ(probs.size(0), num_hyps);
-  CHECK_EQ(probs.size(1), max_hyps_len);
+  CHECK_EQ_THROW(probs.size(0), num_hyps);
+  CHECK_EQ_THROW(probs.size(1), max_hyps_len);
   // Step 3: Compute rescoring score
   for (size_t i = 0; i < num_hyps; ++i) {
     const std::vector<int>& hyp = hypotheses[i];
@@ -319,8 +322,8 @@ void TorchAsrDecoder::AttentionRescoring() {
     float r_score = 0.0f;
     if (opts_.reverse_weight > 0) {
       // Right to left score
-      CHECK_EQ(r_probs.size(0), num_hyps);
-      CHECK_EQ(r_probs.size(1), max_hyps_len);
+      CHECK_EQ_THROW(r_probs.size(0), num_hyps);
+      CHECK_EQ_THROW(r_probs.size(1), max_hyps_len);
       std::vector<int> r_hyp(hyp.size());
       std::reverse_copy(hyp.begin(), hyp.end(), r_hyp.begin());
       // right to left decoder score

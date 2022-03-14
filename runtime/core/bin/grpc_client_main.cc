@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   wenet::WavReader wav_reader(FLAGS_wav_path);
   const int sample_rate = 16000;
   // Only support 16K
-  CHECK_EQ(wav_reader.sample_rate(), sample_rate);
+  CHECK_EQ_THROW(wav_reader.sample_rate(), sample_rate);
   const int num_sample = wav_reader.num_sample();
   std::vector<float> pcm_data(wav_reader.data(),
                               wav_reader.data() + num_sample);

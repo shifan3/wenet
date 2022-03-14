@@ -187,8 +187,8 @@ class ConnectionHandler {
             pdata++;
         }
         VLOG(2) << "Received " << num_samples << " samples";
-        CHECK(feature_pipeline_ != nullptr);
-        CHECK(decoder_ != nullptr);
+        CHECK_THROW(feature_pipeline_ != nullptr);
+        CHECK_THROW(decoder_ != nullptr);
         feature_pipeline_->AcceptWaveform(pcm_data);
     }
 
@@ -231,7 +231,7 @@ class ConnectionHandler {
                     decoder_->Rescoring();
                     std::string result = SerializeResult(true);
                     OnFinalResult(result);
-                    // If it's not continuous decoidng, continue to do next recognition
+                    // If it's not continuous decoding, continue to do next recognition
                     // otherwise stop the recognition
                     if (continuous_decoding_) {
                         decoder_->ResetContinuousDecoding();

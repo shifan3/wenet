@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     while (getline(wav_scp, line)) {
       std::vector<std::string> strs;
       wenet::SplitString(line, &strs);
-      CHECK_GE(strs.size(), 2);
+      CHECK_GE_THROW(strs.size(), 2);
       waves.emplace_back(make_pair(strs[0], strs[1]));
     }
   }
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   int total_decode_time = 0;
   for (auto &wav : waves) {
     wenet::WavReader wav_reader(wav.second);
-    CHECK_EQ(wav_reader.sample_rate(), FLAGS_sample_rate);
+    CHECK_EQ_THROW(wav_reader.sample_rate(), FLAGS_sample_rate);
 
     auto feature_pipeline =
         std::make_shared<wenet::FeaturePipeline>(*feature_config);

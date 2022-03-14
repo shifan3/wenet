@@ -45,8 +45,8 @@ bool CtcEndpoint::IsEndpoint(const torch::Tensor& ctc_log_probs,
       num_frames_trailing_blank_ = 0;
     }
   }
-  CHECK_GE(num_frames_decoded_, num_frames_trailing_blank_);
-  CHECK_GT(frame_shift_in_ms_, 0);
+  CHECK_GE_THROW(num_frames_decoded_, num_frames_trailing_blank_);
+  CHECK_GT_THROW(frame_shift_in_ms_, 0);
   int utterance_length = num_frames_decoded_ * frame_shift_in_ms_;
   int trailing_silence = num_frames_trailing_blank_ * frame_shift_in_ms_;
   if (RuleActivated(config_.rule1, "rule1", decoded_something, trailing_silence,
