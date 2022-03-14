@@ -40,6 +40,9 @@ private:
 #define CHECK_OP_THROW(var1, var2, OP) OP(var1, var2); \
     throw check_error("check fail: " #var1 " " #OP " " #var2)
 
+#define CHECK_THROW(cond) CHECK(cond); \
+    throw check_error("check fail: " #cond);
+
 
 #define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ)
 #define CHECK_NE_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_NE)

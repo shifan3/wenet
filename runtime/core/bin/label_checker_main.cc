@@ -48,7 +48,7 @@ bool MapToLabel(const std::string &text,
 std::shared_ptr<fst::SymbolTable> MakeSymbolTableForFst(
     std::shared_ptr<fst::SymbolTable> isymbol_table) {
   LOG(INFO) << isymbol_table;
-  CHECK(isymbol_table != nullptr);
+  CHECK_THROW(isymbol_table != nullptr);
   auto osymbol_table = std::make_shared<fst::SymbolTable>();
   osymbol_table->AddSymbol("<eps>", 0);
   CHECK_EQ_THROW(isymbol_table->Find("<blank>"), 0);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   auto decode_config = wenet::InitDecodeOptionsFromFlags();
   auto feature_config = wenet::InitFeaturePipelineConfigFromFlags();
   auto decode_resource = wenet::InitDecodeResourceFromFlags();
-  CHECK(decode_resource->unit_table != nullptr);
+  CHECK_THROW(decode_resource->unit_table != nullptr);
 
   auto wfst_symbol_table =
       wenet::MakeSymbolTableForFst(decode_resource->unit_table);

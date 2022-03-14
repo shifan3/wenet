@@ -78,7 +78,7 @@ class Fbank {
           last_index = i;
         }
       }
-      CHECK(first_index != -1 && last_index >= first_index);
+      CHECK_THROW(first_index != -1 && last_index >= first_index);
       bins_[bin].first = first_index;
       int size = last_index + 1 - first_index;
       bins_[bin].second.resize(size);

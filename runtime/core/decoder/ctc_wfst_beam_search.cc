@@ -25,7 +25,7 @@ void DecodableTensorScaled::AcceptLoglikes(const torch::Tensor& logp) {
 }
 
 float DecodableTensorScaled::LogLikelihood(int32 frame, int32 index) {
-  CHECK(accessor_ != nullptr);
+  CHECK_THROW(accessor_ != nullptr);
   CHECK_GT_THROW(index, 0);
   CHECK_LE_THROW(index, logp_.size(0));
   CHECK_LT_THROW(frame, num_frames_ready_);

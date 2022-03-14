@@ -28,7 +28,7 @@ TorchAsrDecoder::TorchAsrDecoder(
       ctc_endpointer_(new CtcEndpoint(opts.ctc_endpoint_config)) {
   if (opts_.reverse_weight > 0) {
     // Check if model has a right to left decoder
-    CHECK(model_->is_bidirectional_decoder());
+    CHECK_THROW(model_->is_bidirectional_decoder());
   }
   if (nullptr == fst_) {
     searcher_.reset(new CtcPrefixBeamSearch(opts.ctc_prefix_search_opts,
@@ -176,7 +176,7 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
       // chunk_feats.size() > cached_feature_size_ here, and it's consistent
       // with our current model, refine it later if we have new model or
       // new requirements
-      CHECK(chunk_feats.size() >= cached_feature_size);
+      CHECK_THROW(chunk_feats.size() >= cached_feature_size);
       cached_feature_.resize(cached_feature_size);
       for (int i = 0; i < cached_feature_size; ++i) {
         cached_feature_[i] = std::move(

@@ -187,8 +187,8 @@ class ConnectionHandler {
             pdata++;
         }
         VLOG(2) << "Received " << num_samples << " samples";
-        CHECK(feature_pipeline_ != nullptr);
-        CHECK(decoder_ != nullptr);
+        CHECK_THROW(feature_pipeline_ != nullptr);
+        CHECK_THROW(decoder_ != nullptr);
         feature_pipeline_->AcceptWaveform(pcm_data);
     }
 
