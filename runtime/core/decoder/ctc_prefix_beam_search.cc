@@ -77,7 +77,6 @@ void CtcPrefixBeamSearch::UpdateHypotheses(
   likelihood_.clear();
   viterbi_likelihood_.clear();
   times_.clear();
-  LOG(INFO) << "D1 " << hypotheses_.size() << " " << times_.size();
   for (auto& item : hpys) {
     cur_hyps_[item.first] = item.second;
     UpdateOutputs(item);
@@ -85,7 +84,6 @@ void CtcPrefixBeamSearch::UpdateHypotheses(
     likelihood_.emplace_back(item.second.total_score());
     viterbi_likelihood_.emplace_back(item.second.viterbi_score());
     times_.emplace_back(item.second.times());
-    LOG(INFO) << "D2 " << hypotheses_.size() << " " << times_.size();
   }
 }
 
@@ -202,7 +200,6 @@ void CtcPrefixBeamSearch::Search(const torch::Tensor& logp) {
 void CtcPrefixBeamSearch::FinalizeSearch() { UpdateFinalContext(); }
 
 void CtcPrefixBeamSearch::UpdateFinalContext() {
-  LOG(INFO) << "E1";
   if (context_graph_ == nullptr) return;
   CHECK_EQ_THROW(hypotheses_.size(), cur_hyps_.size());
   CHECK_EQ_THROW(hypotheses_.size(), likelihood_.size());
@@ -218,7 +215,6 @@ void CtcPrefixBeamSearch::UpdateFinalContext() {
   std::vector<std::pair<std::vector<int>, PrefixScore>> arr(cur_hyps_.begin(),
                                                             cur_hyps_.end());
   std::sort(arr.begin(), arr.end(), PrefixScoreCompare);
-  LOG(INFO) << "E2";
   // Update cur_hyps_ and get new result
   UpdateHypotheses(arr);
 }
