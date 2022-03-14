@@ -30,11 +30,9 @@ public:
         : std::runtime_error(message) {}
 
 
-    virtual ~check_error() BOOST_NOEXCEPT_OR_NOTHROW {}
+    virtual ~check_error() {}
 
 private:
-    error_code           m_error_code;
-    mutable std::string  m_what;
 };
 
 #define CHECK_OP_THROW(var1, var2, OP) OP(var1, var2); \
