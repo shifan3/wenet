@@ -106,6 +106,10 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
   if (!feature_pipeline_->Read(num_requried_frames, &chunk_feats)) {
     state = DecodeState::kEndFeats;
   }
+  if (chunk_feats.empty()) {
+    LOG(INFO) << "read empty feats, stop decoding";
+    return state;
+  }
 
   num_frames_in_current_chunk_ = chunk_feats.size();
   num_frames_ += chunk_feats.size();

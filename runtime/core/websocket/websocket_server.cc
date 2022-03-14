@@ -221,17 +221,22 @@ class ConnectionHandler {
             while (true) {
                 DecodeState state = decoder_->Decode();
                 if (state == DecodeState::kEndFeats) {
+                    LOG(INFO) << "A1";
                     decoder_->Rescoring();
+                    LOG(INFO) << "A2";
                     std::string result = SerializeResult(true);
+                    LOG(INFO) << "A3";
                     OnFinalResult(result);
+                    LOG(INFO) << "A4";
                     OnFinish();
+                    LOG(INFO) << "A5";
                     stop_recognition_ = true;
                     break;
                 } else if (state == DecodeState::kEndpoint) {
                     decoder_->Rescoring();
                     std::string result = SerializeResult(true);
                     OnFinalResult(result);
-                    // If it's not continuous decoidng, continue to do next recognition
+                    // If it's not continuous decoding, continue to do next recognition
                     // otherwise stop the recognition
                     if (continuous_decoding_) {
                         decoder_->ResetContinuousDecoding();
