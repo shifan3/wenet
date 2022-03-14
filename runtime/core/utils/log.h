@@ -27,7 +27,7 @@ class check_error : public std::runtime_error
 {
 public:
     explicit check_error( const char* message )
-        : std::runtime_error(message)x {}
+        : std::runtime_error(message) {}
 
 
     virtual ~check_error() BOOST_NOEXCEPT_OR_NOTHROW {}
