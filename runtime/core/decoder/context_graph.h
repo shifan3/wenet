@@ -11,7 +11,7 @@
 #include "fst/compose.h"
 #include "fst/fst.h"
 #include "fst/vector-fst.h"
-#inlcude "utils/log.h"
+#include "utils/log.h"
 
 namespace wenet {
 
