@@ -43,11 +43,11 @@ private:
 
 
 #define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ)
-#define CHECK_NE_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_NE)
-#define CHECK_LE_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_LE)
-#define CHECK_LT_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_LT)
-#define CHECK_GE_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_GE)
-#define CHECK_GT_THROW(val1, val2) CHECK_OP_THROW(var1, var2, CHECK_GT)
+#define CHECK_NE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_NE)
+#define CHECK_LE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LE)
+#define CHECK_LT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LT)
+#define CHECK_GE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GE)
+#define CHECK_GT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GT)
 
 
 #endif  // UTILS_LOG_H_
