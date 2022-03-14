@@ -69,7 +69,6 @@ class ConnectionHandler {
             ws_.next_layer().set_verify_mode(asio::ssl::verify_none);
             ws_.next_layer().handshake(ssl::stream_base::server);
             ws_.accept();
-            throw check_error("");
             for (;;) {
                 // This buffer will hold the incoming message
                 beast::flat_buffer buffer;
