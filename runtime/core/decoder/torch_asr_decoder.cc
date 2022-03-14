@@ -262,38 +262,50 @@ float TorchAsrDecoder::AttentionDecoderScore(const torch::Tensor& prob,
 }
 
 void TorchAsrDecoder::AttentionRescoring() {
+  LOG(INFO) << "B1";
   searcher_->FinalizeSearch();
+  LOG(INFO) << "B2";
   UpdateResult(true);
+  LOG(INFO) << "B3";
   // No need to do rescoring
   if (0.0 == opts_.rescoring_weight) {
     return;
   }
+  LOG(INFO) << "B4";
   // No encoder output
   if (encoder_outs_.size() == 0) {
     return;
   }
-
+  LOG(INFO) << "B5";
   int sos = model_->sos();
+  LOG(INFO) << "B6";
   int eos = model_->eos();
+  LOG(INFO) << "B7";
   // Inputs() returns N-best input ids, which is the basic unit for rescoring
   // In CtcPrefixBeamSearch, inputs are the same to outputs
   const auto& hypotheses = searcher_->Inputs();
+  LOG(INFO) << "B8";
   int num_hyps = hypotheses.size();
+  LOG(INFO) << "B9";
   if (num_hyps <= 0) {
     return;
   }
 
   torch::NoGradGuard no_grad;
+  LOG(INFO) << "B10";
   // Step 1: Prepare input for libtorch
   torch::Tensor hyps_length = torch::zeros({num_hyps}, torch::kLong);
+  LOG(INFO) << "B11";
   int max_hyps_len = 0;
   for (size_t i = 0; i < num_hyps; ++i) {
     int length = hypotheses[i].size() + 1;
     max_hyps_len = std::max(length, max_hyps_len);
     hyps_length[i] = static_cast<int64_t>(length);
   }
+  LOG(INFO) << "B12";
   torch::Tensor hyps_tensor =
       torch::zeros({num_hyps, max_hyps_len}, torch::kLong);
+  LOG(INFO) << "B13";
   for (size_t i = 0; i < num_hyps; ++i) {
     const std::vector<int>& hyp = hypotheses[i];
     hyps_tensor[i][0] = sos;
@@ -301,35 +313,49 @@ void TorchAsrDecoder::AttentionRescoring() {
       hyps_tensor[i][j + 1] = hyp[j];
     }
   }
-
+  LOG(INFO) << "B14";
   // Step 2: Forward attention decoder by hyps and corresponding encoder_outs_
   torch::Tensor encoder_out = torch::cat(encoder_outs_, 1);
+  LOG(INFO) << "B15";
   auto outputs =
       model_->torch_model()
           ->run_method("forward_attention_decoder", hyps_tensor, hyps_length,
                        encoder_out, opts_.reverse_weight)
           .toTuple()
           ->elements();
+    LOG(INFO) << "B16";
   auto probs = outputs[0].toTensor();
+  LOG(INFO) << "B17";
   auto r_probs = outputs[1].toTensor();
+  LOG(INFO) << "B18";
   CHECK_EQ_THROW(probs.size(0), num_hyps);
+  LOG(INFO) << "B19";
   CHECK_EQ_THROW(probs.size(1), max_hyps_len);
+  LOG(INFO) << "B20";
   // Step 3: Compute rescoring score
   for (size_t i = 0; i < num_hyps; ++i) {
+    LOG(INFO) << "B20.1";
     const std::vector<int>& hyp = hypotheses[i];
+    LOG(INFO) << "B20.2";
     float score = 0.0f;
     // left to right decoder score
     score = AttentionDecoderScore(probs[i], hyp, eos);
+    LOG(INFO) << "B20.3";
     // Optional: Used for right to left score
     float r_score = 0.0f;
     if (opts_.reverse_weight > 0) {
       // Right to left score
+      LOG(INFO) << "B20.4";
       CHECK_EQ_THROW(r_probs.size(0), num_hyps);
       CHECK_EQ_THROW(r_probs.size(1), max_hyps_len);
+      LOG(INFO) << "B20.5";
       std::vector<int> r_hyp(hyp.size());
+      LOG(INFO) << "B20.6";
       std::reverse_copy(hyp.begin(), hyp.end(), r_hyp.begin());
+      LOG(INFO) << "B20.7";
       // right to left decoder score
       r_score = AttentionDecoderScore(r_probs[i], r_hyp, eos);
+      LOG(INFO) << "B20.8";
     }
     // combined reverse attention score
     score =
@@ -338,7 +364,9 @@ void TorchAsrDecoder::AttentionRescoring() {
     result_[i].score =
         opts_.rescoring_weight * score + opts_.ctc_weight * result_[i].score;
   }
+  LOG(INFO) << "B21";
   std::sort(result_.begin(), result_.end(), DecodeResult::CompareFunc);
+  LOG(INFO) << "B22";
 }
 
 }  // namespace wenet
