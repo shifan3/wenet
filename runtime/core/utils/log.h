@@ -35,19 +35,19 @@ public:
 private:
 };
 
-#define CHECK_OP_THROW(var1, var2, OP) OP(var1, var2); \
-    throw check_error("check fail: " #var1 " " #OP " " #var2)
+#define CHECK_OP_THROW(var1, var2, OP, op) OP(var1, var2); \
+    if (!((var1) op (var2))) throw check_error("check fail: " #var1 " " #OP " " #var2)
 
 #define CHECK_THROW(cond) CHECK(cond); \
     if (!(cond)) throw check_error("check fail: " #cond);
 
 
-#define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ)
-#define CHECK_NE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_NE)
-#define CHECK_LE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LE)
-#define CHECK_LT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LT)
-#define CHECK_GE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GE)
-#define CHECK_GT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GT)
+#define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ, ==)
+#define CHECK_NE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_NE, !=)
+#define CHECK_LE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LE, <=)
+#define CHECK_LT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_LT, <)
+#define CHECK_GE_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GE, >=)
+#define CHECK_GT_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_GT, >)
 
 
 #endif  // UTILS_LOG_H_
