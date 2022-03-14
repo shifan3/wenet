@@ -202,7 +202,7 @@ void TorchAsrDecoder::UpdateResult(bool finish) {
   const auto& likelihood = searcher_->Likelihood();
   const auto& times = searcher_->Times();
   result_.clear();
-  LOG(INFO) << "C2";
+  LOG(INFO) << "C2 "  << hypotheses.size() << " " << times.size() << " " << likelihood.size() << " " << inputs.size();
   CHECK_EQ_THROW(hypotheses.size(), likelihood.size());
   for (size_t i = 0; i < hypotheses.size(); i++) {
     LOG(INFO) << "C3";
