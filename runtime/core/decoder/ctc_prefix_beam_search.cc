@@ -76,6 +76,7 @@ void CtcPrefixBeamSearch::UpdateHypotheses(
   likelihood_.clear();
   viterbi_likelihood_.clear();
   times_.clear();
+  LOG(INFO) << "D1 " << hypotheses_.size() << " " << times_.size();
   for (auto& item : hpys) {
     cur_hyps_[item.first] = item.second;
     UpdateOutputs(item);
@@ -83,6 +84,7 @@ void CtcPrefixBeamSearch::UpdateHypotheses(
     likelihood_.emplace_back(item.second.total_score());
     viterbi_likelihood_.emplace_back(item.second.viterbi_score());
     times_.emplace_back(item.second.times());
+    LOG(INFO) << "D2 " << hypotheses_.size() << " " << times_.size();
   }
 }
 
