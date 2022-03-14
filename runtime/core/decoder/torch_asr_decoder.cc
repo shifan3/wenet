@@ -105,6 +105,7 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
   // If not okay, that means we reach the end of the input
   if (!feature_pipeline_->Read(num_requried_frames, &chunk_feats)) {
     state = DecodeState::kEndFeats;
+    return state;
   }
   if (chunk_feats.empty() && state == DecodeState::kEndFeats) {
     LOG(INFO) << "read empty feats, stop decoding";
