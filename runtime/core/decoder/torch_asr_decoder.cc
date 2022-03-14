@@ -12,6 +12,7 @@
 
 #include "decoder/ctc_endpoint.h"
 #include "utils/timer.h"
+#include "utils/log.h"
 
 namespace wenet {
 
