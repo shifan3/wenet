@@ -39,7 +39,7 @@ private:
     throw check_error("check fail: " #var1 " " #OP " " #var2)
 
 #define CHECK_THROW(cond) CHECK(cond); \
-    throw check_error("check fail: " #cond);
+    if (!(cond)) throw check_error("check fail: " #cond);
 
 
 #define CHECK_EQ_THROW(var1, var2) CHECK_OP_THROW(var1, var2, CHECK_EQ)
