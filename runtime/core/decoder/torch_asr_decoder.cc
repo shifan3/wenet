@@ -107,10 +107,6 @@ DecodeState TorchAsrDecoder::AdvanceDecoding() {
     state = DecodeState::kEndFeats;
     return state;
   }
-  if (state == DecodeState::kEndFeats) {
-    LOG(INFO) << "read empty feats, stop decoding";
-    return state;
-  }
 
   num_frames_in_current_chunk_ = chunk_feats.size();
   num_frames_ += chunk_feats.size();

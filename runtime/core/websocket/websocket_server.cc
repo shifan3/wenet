@@ -68,6 +68,7 @@ class ConnectionHandler {
             // Accept the websocket handshake
             ws_.next_layer().set_verify_mode(asio::ssl::verify_none);
             ws_.next_layer().handshake(ssl::stream_base::server);
+            
             ws_.accept();
             for (;;) {
                 // This buffer will hold the incoming message
@@ -200,7 +201,7 @@ class ConnectionHandler {
         ws_.close(websocket::close_code::normal);
     }
 
-    void OnPartialResult(const std::string& result) {
+    void OnPartialResult(const json::array& result) {
         LOG(INFO) << "Partial result: " << result;
         json::value rv = {
                 {"status", "ok"}, {"type", "partial_result"}, {"nbest", result}};
@@ -208,7 +209,7 @@ class ConnectionHandler {
         ws_.write(asio::buffer(json::serialize(rv)));
     }
 
-    void OnFinalResult(const std::string& result) {
+    void OnFinalResult(const json::array& result) {
         LOG(INFO) << "Final result: " << result;
         json::value rv = {
                 {"status", "ok"}, {"type", "final_result"}, {"nbest", result}};
@@ -222,14 +223,14 @@ class ConnectionHandler {
                 DecodeState state = decoder_->Decode();
                 if (state == DecodeState::kEndFeats) {
                     decoder_->Rescoring();
-                    std::string result = SerializeResult(true);
+                    json::array result = SerializeResult(true);
                     OnFinalResult(result);
                     OnFinish();
                     stop_recognition_ = true;
                     break;
                 } else if (state == DecodeState::kEndpoint) {
                     decoder_->Rescoring();
-                    std::string result = SerializeResult(true);
+                    json::array result = SerializeResult(true);
                     OnFinalResult(result);
                     // If it's not continuous decoding, continue to do next recognition
                     // otherwise stop the recognition
@@ -242,7 +243,7 @@ class ConnectionHandler {
                     }
                 } else {
                     if (decoder_->DecodedSomething()) {
-                        std::string result = SerializeResult(false);
+                        json::array result = SerializeResult(false);
                         OnPartialResult(result);
                     }
                 }
@@ -252,7 +253,7 @@ class ConnectionHandler {
         }
     }
 
-    std::string SerializeResult(bool finish) {
+    json::array SerializeResult(bool finish) {
         json::array nbest;
         for (const DecodeResult& path : decoder_->result()) {
             json::object jpath({{"sentence", path.sentence}});
@@ -272,7 +273,7 @@ class ConnectionHandler {
                 break;
             }
         }
-        return json::serialize(nbest);
+        return nbest; //json::serialize();
     }
 
     
@@ -299,7 +300,7 @@ void WebSocketServer::Start() {
             t.detach();
         }
     } catch (const std::exception& e) {
-        LOG(FATAL) << e.what();
+        LOG(ERROR) << e.what();
     }
 }
 
