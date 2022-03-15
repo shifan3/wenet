@@ -90,13 +90,13 @@
     function parseResult(data) {
       var data = JSON.parse(data)
       if (data.type == 'partial_result') {
-        nbest = JSON.parse(data.nbest)
+        nbest = data.nbest
         var sentence = nbest[0].sentence
         if (sentence.length > 0) {
           $("#resultPanel").html(result + sentence)
         }
       } else if (data.type == 'final_result') {
-        nbest = JSON.parse(data.nbest)
+        nbest = data.nbest
         var sentence = nbest[0].sentence
         if (sentence.length > 0) {
           result += sentence + "，"
