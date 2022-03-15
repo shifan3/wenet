@@ -66,10 +66,8 @@ class ConnectionHandler {
     void operator()() {
         try {
             // Accept the websocket handshake
-            LOG(INFO) << "a1";
             ws_.next_layer().set_verify_mode(asio::ssl::verify_none);
             ws_.next_layer().handshake(ssl::stream_base::server);
-            LOG(INFO) << "a2";
             
             ws_.accept();
             for (;;) {
