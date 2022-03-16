@@ -8,11 +8,13 @@
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
-stage=4 # start from 0 if you need to start from data preparation
+stage=-1 # start from 0 if you need to start from data preparation
 stop_stage=6
 # data
-data=/export/data/asr-data/OpenSLR/33/
+data=./export/data/asr-data/OpenSLR/33/
 data_url=www.openslr.org/resources/33
+
+mkdir $data -p
 
 nj=16
 feat_dir=fbank
