@@ -8,8 +8,8 @@ set -e
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
-stage=$0 # start from 0 if you need to start from data preparation
-stop_stage=$1
+stage=$1 # start from 0 if you need to start from data preparation
+stop_stage=$2
 if [ -z $stage ]; then
     stage=-1
 fi
