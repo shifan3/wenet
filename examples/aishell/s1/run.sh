@@ -11,7 +11,7 @@ export CUDA_VISIBLE_DEVICES="0,1,2,3"
 stage=-1 # start from 0 if you need to start from data preparation
 stop_stage=6
 # data
-data=./export/data/asr-data/OpenSLR/33/
+data=`pwd`/export/data/asr-data/OpenSLR/33/
 data_url=www.openslr.org/resources/33
 
 mkdir $data -p
