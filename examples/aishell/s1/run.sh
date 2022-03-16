@@ -47,6 +47,7 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+    echo "stage 0: prepare data"
     # Data preparation
     local/aishell_data_prep.sh ${data}/data_aishell/wav ${data}/data_aishell/transcript
     utils/perturb_data_dir_speed.sh 0.9 data/train data/train_sp0.9
@@ -64,6 +65,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     # Feature extraction
+    echo "stage 1: Feature extraction"
     mkdir -p $feat_dir
     for x in ${train_set} dev test; do
         cp -r data/$x $feat_dir
@@ -78,7 +80,7 @@ fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     # Make train dict
-    echo "Make a dictionary"
+    echo "stage 2: Make a dictionary"
     mkdir -p $(dirname $dict)
     echo "<blank> 0" > ${dict} # 0 will be used for "blank" in CTC
     echo "<unk> 1" >> ${dict} # <unk> must be 1
