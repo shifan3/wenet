@@ -128,7 +128,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     for ((i = 0; i < $num_gpus; ++i)); do
     {
         gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-        python3.7 wenet/bin/train_deprecated.py --gpu $gpu_id \
+        python3.8 wenet/bin/train_deprecated.py --gpu $gpu_id \
             --config $train_config \
             --train_data $feat_dir/$train_set/format.data \
             --cv_data $feat_dir/dev/format.data \
@@ -153,7 +153,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     if [ ${average_checkpoint} == true ]; then
         decode_checkpoint=$dir/avg_${average_num}.pt
         echo "do model average and final checkpoint is $decode_checkpoint"
-        python3.7 wenet/bin/average_model.py \
+        python3.8 wenet/bin/average_model.py \
             --dst_model $decode_checkpoint \
             --src_path $dir  \
             --num ${average_num} \
@@ -167,7 +167,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     {
         test_dir=$dir/test_${mode}
         mkdir -p $test_dir
-        python3.7 wenet/bin/recognize_deprecated.py --gpu 0 \
+        python3.8 wenet/bin/recognize_deprecated.py --gpu 0 \
             --mode $mode \
             --config $dir/train.yaml \
             --test_data $feat_dir/test/format.data \
@@ -179,7 +179,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
             --ctc_weight $ctc_weight \
             --result_file $test_dir/text \
             ${decoding_chunk_size:+--decoding_chunk_size $decoding_chunk_size}
-         python3.7 tools/compute-wer.py --char=1 --v=1 \
+         python3.8 tools/compute-wer.py --char=1 --v=1 \
             $feat_dir/test/text $test_dir/text > $test_dir/wer
     } &
     done
@@ -190,7 +190,7 @@ fi
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
     echo "stage 6: Export model"
     # Export the best model you want
-    python3.7 wenet/bin/export_jit.py \
+    python3.8 wenet/bin/export_jit.py \
         --config $dir/train.yaml \
         --checkpoint $dir/avg_${average_num}.pt \
         --output_file $dir/final.zip
