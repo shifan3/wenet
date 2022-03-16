@@ -56,11 +56,11 @@ if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
     echo "stage 0: prepare data"
     # Data preparation
     local/aishell_data_prep.sh ${data}/data_aishell/wav ${data}/data_aishell/transcript
-    echo "A1"
+    utils/data/get_reco2dur.sh data/train
     utils/perturb_data_dir_speed.sh 0.9 data/train data/train_sp0.9
-    echo "A2"
+    
     utils/perturb_data_dir_speed.sh 1.1 data/train data/train_sp1.1
-    echo "A3"
+
     utils/combine_data.sh data/train_sp data/train data/train_sp0.9 data/train_sp1.1
     # Remove the space in Mandarin text
     for x in train_sp dev test; do
