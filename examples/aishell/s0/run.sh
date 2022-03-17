@@ -70,7 +70,8 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-  # Data preparation
+  # 
+  echo "stage 0: Data preparation"
   local/aishell_data_prep.sh ${data}/data_aishell/wav \
     ${data}/data_aishell/transcript
 fi
@@ -78,6 +79,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   # remove the space between the text labels for Mandarin dataset
+  echo "stage 1: remove the space between the text labels for Mandarin dataset"
   for x in train dev test; do
     cp data/${x}/text data/${x}/text.org
     paste -d " " <(cut -f 1 -d" " data/${x}/text.org) \
@@ -92,7 +94,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-  echo "Make a dictionary"
+  echo "stage 2: Make a dictionary"
   mkdir -p $(dirname $dict)
   echo "<blank> 0" > ${dict}  # 0 is for "blank" in CTC
   echo "<unk> 1"  >> ${dict}  # <unk> must be 1
@@ -104,7 +106,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-  echo "Prepare data, prepare requried format"
+  echo "stage 3: Prepare data, prepare requried format"
   for x in dev test ${train_set}; do
     if [ $data_type == "shard" ]; then
       tools/make_shard_list.py --num_utts_per_shard $num_utts_per_shard \
@@ -118,6 +120,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+echo "stage 4: Training"
   mkdir -p $dir
   # You have to rm `INIT_FILE` manually when you resume or restart a
   # multi-machine training.
@@ -163,6 +166,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+  echo "stage 5: Test model"
   # Test model, please specify the model you want to test by --checkpoint
   if [ ${average_checkpoint} == true ]; then
     decode_checkpoint=$dir/avg_${average_num}.pt
@@ -207,6 +211,7 @@ fi
 
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
   # Export the best model you want
+  echo "stage 6: Export model"
   python wenet/bin/export_jit.py \
     --config $dir/train.yaml \
     --checkpoint $dir/avg_${average_num}.pt \
@@ -217,6 +222,7 @@ fi
 # Optionally, you can add LM and test it with runtime.
 if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
   # 7.1 Prepare dict
+  echo "stage 7: [Optional] Add LM and test it with runtime."
   unit_file=$dict
   mkdir -p data/local/dict
   cp $unit_file data/local/dict/units.txt
