@@ -1,18 +1,25 @@
 #!/bin/bash
-
+set -e
 # Copyright 2019 Mobvoi Inc. All Rights Reserved.
 . ./path.sh || exit 1;
 
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
-export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+
 # The NCCL_SOCKET_IFNAME variable specifies which IP interface to use for nccl
 # communication. More details can be found in
 # https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html
 # export NCCL_SOCKET_IFNAME=ens4f1
 export NCCL_DEBUG=INFO
-stage=0 # start from 0 if you need to start from data preparation
-stop_stage=5
+export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+stage=$1 # start from 0 if you need to start from data preparation
+stop_stage=$2
+if [ -z $stage ]; then
+    stage=-1
+fi
+if [ -z $stop_stage ]; then
+    stage=6
+fi
 
 # The num of machines(nodes) for multi-machine training, 1 is for one machine.
 # NFS is required if num_nodes > 1.
@@ -23,7 +30,7 @@ num_nodes=1
 # on the second machine, and so on.
 node_rank=0
 # data
-data=/export/data/asr-data/OpenSLR/33/
+data=`pwd`/export/data/asr-data/OpenSLR/33/
 data_url=www.openslr.org/resources/33
 
 nj=16
@@ -63,7 +70,8 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-  # Data preparation
+  # 
+  echo "stage 0: Data preparation"
   local/aishell_data_prep.sh ${data}/data_aishell/wav \
     ${data}/data_aishell/transcript
 fi
@@ -71,6 +79,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   # remove the space between the text labels for Mandarin dataset
+  echo "stage 1: remove the space between the text labels for Mandarin dataset"
   for x in train dev test; do
     cp data/${x}/text data/${x}/text.org
     paste -d " " <(cut -f 1 -d" " data/${x}/text.org) \
@@ -85,7 +94,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
 fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-  echo "Make a dictionary"
+  echo "stage 2: Make a dictionary"
   mkdir -p $(dirname $dict)
   echo "<blank> 0" > ${dict}  # 0 is for "blank" in CTC
   echo "<unk> 1"  >> ${dict}  # <unk> must be 1
@@ -97,7 +106,7 @@ if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
 fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
-  echo "Prepare data, prepare requried format"
+  echo "stage 3: Prepare data, prepare requried format"
   for x in dev test ${train_set}; do
     if [ $data_type == "shard" ]; then
       tools/make_shard_list.py --num_utts_per_shard $num_utts_per_shard \
@@ -111,6 +120,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+echo "stage 4: Training"
   mkdir -p $dir
   # You have to rm `INIT_FILE` manually when you resume or restart a
   # multi-machine training.
@@ -134,8 +144,9 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
     # Rank of each gpu/process used for knowing whether it is
     # the master of a worker.
-    rank=`expr $node_rank \* $num_gpus + $i`
-    python wenet/bin/train.py --gpu $gpu_id \
+    rank=$i
+    
+    python3.8 wenet/bin/train.py --gpu $gpu_id \
       --config $train_config \
       --data_type $data_type \
       --symbol_table $dict \
@@ -156,11 +167,12 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
+  echo "stage 5: Test model"
   # Test model, please specify the model you want to test by --checkpoint
   if [ ${average_checkpoint} == true ]; then
     decode_checkpoint=$dir/avg_${average_num}.pt
     echo "do model average and final checkpoint is $decode_checkpoint"
-    python wenet/bin/average_model.py \
+    python3.8 wenet/bin/average_model.py \
       --dst_model $decode_checkpoint \
       --src_path $dir  \
       --num ${average_num} \
@@ -176,7 +188,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   {
     test_dir=$dir/test_${mode}
     mkdir -p $test_dir
-    python wenet/bin/recognize.py --gpu 0 \
+    python3.8 wenet/bin/recognize.py --gpu 0 \
       --mode $mode \
       --config $dir/train.yaml \
       --data_type $data_type \
@@ -190,7 +202,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
       --reverse_weight $reverse_weight \
       --result_file $test_dir/text \
       ${decoding_chunk_size:+--decoding_chunk_size $decoding_chunk_size}
-    python tools/compute-wer.py --char=1 --v=1 \
+    python3.8 tools/compute-wer.py --char=1 --v=1 \
       data/test/text $test_dir/text > $test_dir/wer
   } &
   done
@@ -200,7 +212,8 @@ fi
 
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
   # Export the best model you want
-  python wenet/bin/export_jit.py \
+  echo "stage 6: Export model"
+  python3.8 wenet/bin/export_jit.py \
     --config $dir/train.yaml \
     --checkpoint $dir/avg_${average_num}.pt \
     --output_file $dir/final.zip \
@@ -210,6 +223,7 @@ fi
 # Optionally, you can add LM and test it with runtime.
 if [ ${stage} -le 7 ] && [ ${stop_stage} -ge 7 ]; then
   # 7.1 Prepare dict
+  echo "stage 7: [Optional] Add LM and test it with runtime."
   unit_file=$dict
   mkdir -p data/local/dict
   cp $unit_file data/local/dict/units.txt

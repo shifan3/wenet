@@ -1,18 +1,26 @@
 #!/bin/bash
 
 # Copyright 2019 Mobvoi Inc. All Rights Reserved.
-
+set -e
 . ./path.sh || exit 1;
 . ./cmd.sh || exit 1;
 
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
-stage=4 # start from 0 if you need to start from data preparation
-stop_stage=6
+stage=$1 # start from 0 if you need to start from data preparation
+stop_stage=$2
+if [ -z $stage ]; then
+    stage=-1
+fi
+if [ -z $stop_stage ]; then
+    stage=6
+fi
 # data
-data=/export/data/asr-data/OpenSLR/33/
+data=`pwd`/export/data/asr-data/OpenSLR/33/
 data_url=www.openslr.org/resources/33
+
+mkdir $data -p
 
 nj=16
 feat_dir=fbank
@@ -45,10 +53,14 @@ if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
 fi
 
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+    echo "stage 0: prepare data"
     # Data preparation
     local/aishell_data_prep.sh ${data}/data_aishell/wav ${data}/data_aishell/transcript
+    utils/data/get_reco2dur.sh data/train
     utils/perturb_data_dir_speed.sh 0.9 data/train data/train_sp0.9
+    
     utils/perturb_data_dir_speed.sh 1.1 data/train data/train_sp1.1
+
     utils/combine_data.sh data/train_sp data/train data/train_sp0.9 data/train_sp1.1
     # Remove the space in Mandarin text
     for x in train_sp dev test; do
@@ -62,6 +74,7 @@ fi
 
 if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
     # Feature extraction
+    echo "stage 1: Feature extraction"
     mkdir -p $feat_dir
     for x in ${train_set} dev test; do
         cp -r data/$x $feat_dir
@@ -76,7 +89,7 @@ fi
 
 if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
     # Make train dict
-    echo "Make a dictionary"
+    echo "stage 2: Make a dictionary"
     mkdir -p $(dirname $dict)
     echo "<blank> 0" > ${dict} # 0 will be used for "blank" in CTC
     echo "<unk> 1" >> ${dict} # <unk> must be 1
@@ -88,7 +101,7 @@ fi
 
 if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
     # Prepare wenet requried data
-    echo "Prepare data, prepare requried format"
+    echo "stage 3: Prepare data, prepare requried format"
     for x in dev test ${train_set}; do
         tools/format_data.sh --nj ${nj} --feat $feat_dir/$x/feats.scp \
             $feat_dir/$x ${dict} > $feat_dir/$x/format.data
@@ -96,6 +109,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
 fi
 
 if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
+    echo "stage 4: Training"
     # Training
     mkdir -p $dir
     INIT_FILE=$dir/ddp_init
@@ -114,7 +128,7 @@ if [ ${stage} -le 4 ] && [ ${stop_stage} -ge 4 ]; then
     for ((i = 0; i < $num_gpus; ++i)); do
     {
         gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
-        python wenet/bin/train_deprecated.py --gpu $gpu_id \
+        python3.8 wenet/bin/train_deprecated.py --gpu $gpu_id \
             --config $train_config \
             --train_data $feat_dir/$train_set/format.data \
             --cv_data $feat_dir/dev/format.data \
@@ -134,11 +148,12 @@ fi
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     # Test model, please specify the model you want to test by --checkpoint
     # TODO, Add model average here
+    echo "stage 5: Test model"
     mkdir -p $dir/test
     if [ ${average_checkpoint} == true ]; then
         decode_checkpoint=$dir/avg_${average_num}.pt
         echo "do model average and final checkpoint is $decode_checkpoint"
-        python wenet/bin/average_model.py \
+        python3.8 wenet/bin/average_model.py \
             --dst_model $decode_checkpoint \
             --src_path $dir  \
             --num ${average_num} \
@@ -152,7 +167,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
     {
         test_dir=$dir/test_${mode}
         mkdir -p $test_dir
-        python wenet/bin/recognize_deprecated.py --gpu 0 \
+        python3.8 wenet/bin/recognize_deprecated.py --gpu 0 \
             --mode $mode \
             --config $dir/train.yaml \
             --test_data $feat_dir/test/format.data \
@@ -164,7 +179,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
             --ctc_weight $ctc_weight \
             --result_file $test_dir/text \
             ${decoding_chunk_size:+--decoding_chunk_size $decoding_chunk_size}
-         python tools/compute-wer.py --char=1 --v=1 \
+         python3.8 tools/compute-wer.py --char=1 --v=1 \
             $feat_dir/test/text $test_dir/text > $test_dir/wer
     } &
     done
@@ -173,8 +188,9 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
 fi
 
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
+    echo "stage 6: Export model"
     # Export the best model you want
-    python wenet/bin/export_jit.py \
+    python3.8 wenet/bin/export_jit.py \
         --config $dir/train.yaml \
         --checkpoint $dir/avg_${average_num}.pt \
         --output_file $dir/final.zip
