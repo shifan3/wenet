@@ -141,6 +141,7 @@ echo "stage 4: Training"
   # and export.
   for ((i = 0; i < $num_gpus; ++i)); do
   {
+    echo $i
     gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
     # Rank of each gpu/process used for knowing whether it is
     # the master of a worker.
