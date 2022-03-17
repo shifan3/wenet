@@ -143,6 +143,7 @@ echo "stage 4: Training"
   {
     echo 'a1', $i, $node_rank, $num_gpus
     gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
+    echo 'aa', $i
     # Rank of each gpu/process used for knowing whether it is
     # the master of a worker.
     rank=`expr $node_rank \* $num_gpus + $i`
