@@ -142,6 +142,7 @@ def main():
                                 init_method=args.init_method,
                                 world_size=args.world_size,
                                 rank=args.rank)
+        logging.info("A1")
 
     symbol_table = read_symbol_table(args.symbol_table)
 
