@@ -141,12 +141,12 @@ echo "stage 4: Training"
   # and export.
   for ((i = 0; i < $num_gpus; ++i)); do
   {
-    echo $i
+    echo 'a1', $i, node_rank, num_gpus
     gpu_id=$(echo $CUDA_VISIBLE_DEVICES | cut -d',' -f$[$i+1])
     # Rank of each gpu/process used for knowing whether it is
     # the master of a worker.
     rank=`expr $node_rank \* $num_gpus + $i`
-    echo $i, $rank, $gpu_id
+    echo 'a2', $i, $rank, $gpu_id
     python3.8 wenet/bin/train.py --gpu $gpu_id \
       --config $train_config \
       --data_type $data_type \
