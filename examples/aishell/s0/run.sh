@@ -5,14 +5,21 @@
 
 # Use this to control how many gpu you use, It's 1-gpu training if you specify
 # just 1gpu, otherwise it's is multiple gpu training based on DDP in pytorch
-export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
+
 # The NCCL_SOCKET_IFNAME variable specifies which IP interface to use for nccl
 # communication. More details can be found in
 # https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/env.html
 # export NCCL_SOCKET_IFNAME=ens4f1
 export NCCL_DEBUG=INFO
-stage=0 # start from 0 if you need to start from data preparation
-stop_stage=5
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
+stage=$1 # start from 0 if you need to start from data preparation
+stop_stage=$2
+if [ -z $stage ]; then
+    stage=-1
+fi
+if [ -z $stop_stage ]; then
+    stage=6
+fi
 
 # The num of machines(nodes) for multi-machine training, 1 is for one machine.
 # NFS is required if num_nodes > 1.
@@ -23,7 +30,7 @@ num_nodes=1
 # on the second machine, and so on.
 node_rank=0
 # data
-data=/export/data/asr-data/OpenSLR/33/
+data=`pwd`/export/data/asr-data/OpenSLR/33/
 data_url=www.openslr.org/resources/33
 
 nj=16
