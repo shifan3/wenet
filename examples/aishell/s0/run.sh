@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 # Copyright 2019 Mobvoi Inc. All Rights Reserved.
 . ./path.sh || exit 1;
 
