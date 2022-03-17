@@ -145,6 +145,7 @@ echo "stage 4: Training"
     # Rank of each gpu/process used for knowing whether it is
     # the master of a worker.
     rank=`expr $node_rank \* $num_gpus + $i`
+    echo $i, $rank, $gpu_id
     python3.8 wenet/bin/train.py --gpu $gpu_id \
       --config $train_config \
       --data_type $data_type \
