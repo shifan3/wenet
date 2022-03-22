@@ -139,7 +139,7 @@ echo "stage 4: Training"
     # the master of a worker.
     rank=$i
     
-    python3.8 wenet/bin/train.py --gpu $gpu_id \
+    python3.7 wenet/bin/train.py --gpu $gpu_id \
       --config $train_config \
       --data_type $data_type \
       --symbol_table $dict \
@@ -165,7 +165,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   if [ ${average_checkpoint} == true ]; then
     decode_checkpoint=$dir/avg_${average_num}.pt
     echo "do model average and final checkpoint is $decode_checkpoint"
-    python3.8 wenet/bin/average_model.py \
+    python3.7 wenet/bin/average_model.py \
       --dst_model $decode_checkpoint \
       --src_path $dir  \
       --num ${average_num} \
@@ -181,7 +181,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
   {
     test_dir=$dir/test_${mode}
     mkdir -p $test_dir
-    python3.8 wenet/bin/recognize.py --gpu 0 \
+    python3.7 wenet/bin/recognize.py --gpu 0 \
       --mode $mode \
       --config $dir/train.yaml \
       --data_type $data_type \
@@ -195,7 +195,7 @@ if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then
       --reverse_weight $reverse_weight \
       --result_file $test_dir/text \
       ${decoding_chunk_size:+--decoding_chunk_size $decoding_chunk_size}
-    python3.8 tools/compute-wer.py --char=1 --v=1 \
+    python3.7 tools/compute-wer.py --char=1 --v=1 \
       data/test/text $test_dir/text > $test_dir/wer
   } &
   done
@@ -206,7 +206,7 @@ fi
 if [ ${stage} -le 6 ] && [ ${stop_stage} -ge 6 ]; then
   # Export the best model you want
   echo "stage 6: Export model"
-  python3.8 wenet/bin/export_jit.py \
+  python3.7 wenet/bin/export_jit.py \
     --config $dir/train.yaml \
     --checkpoint $dir/avg_${average_num}.pt \
     --output_file $dir/final.zip \
