@@ -30,8 +30,8 @@ num_nodes=1
 # on the second machine, and so on.
 node_rank=0
 # data
-data=`pwd`/export/data/asr-data/OpenSLR/33/
-data_url=www.openslr.org/resources/33
+data=/mnt/data5/wenet/export/data/asr-data/poetry
+
 
 nj=16
 dict=data/dict/lang_char.txt
@@ -63,17 +63,11 @@ decode_modes="ctc_greedy_search ctc_prefix_beam_search attention attention_resco
 
 . tools/parse_options.sh || exit 1;
 
-if [ ${stage} -le -1 ] && [ ${stop_stage} -ge -1 ]; then
-  echo "stage -1: Data Download"
-  local/download_and_untar.sh ${data} ${data_url} data_aishell
-  local/download_and_untar.sh ${data} ${data_url} resource_aishell
-fi
-
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   # 
   echo "stage 0: Data preparation"
-  local/aishell_data_prep.sh ${data}/data_aishell/wav \
-    ${data}/data_aishell/transcript
+  local/aishell_data_prep.sh ${data}/wav \
+    ${data}/transcript
 fi
 
 
