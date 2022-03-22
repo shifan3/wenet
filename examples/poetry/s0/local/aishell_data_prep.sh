@@ -31,10 +31,9 @@ if [ ! -d $aishell_audio_dir ] || [ ! -f $aishell_text ]; then
 fi
 
 # find wav audio file for train, dev and test resp.
-find $aishell_audio_dir -iname "*.wav" > $tmp_dir/wav.flist
+find $aishell_audio_dir -iname "*.wav" -L > $tmp_dir/wav.flist
 n=`cat $tmp_dir/wav.flist | wc -l`
-[ $n -ne 141925 ] && \
-  echo Warning: expected 141925 data data files, found $n
+
 
 grep -i "wav/train" $tmp_dir/wav.flist > $train_dir/wav.flist || exit 1;
 grep -i "wav/dev" $tmp_dir/wav.flist > $dev_dir/wav.flist || exit 1;

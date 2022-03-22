@@ -66,8 +66,7 @@ decode_modes="ctc_greedy_search ctc_prefix_beam_search attention attention_resco
 if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
   # 
   echo "stage 0: Data preparation"
-  local/aishell_data_prep.sh ${data}/wav \
-    ${data}/transcript
+  local/aishell_data_prep.sh ${data}/wav ${data}/transcript
 fi
 
 
