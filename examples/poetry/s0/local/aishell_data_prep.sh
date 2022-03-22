@@ -31,7 +31,7 @@ if [ ! -d $aishell_audio_dir ] || [ ! -f $aishell_text ]; then
 fi
 
 # find wav audio file for train, dev and test resp.
-find $aishell_audio_dir -iname "*.wav" -L > $tmp_dir/wav.flist
+find  -L $aishell_audio_dir -iname "*.wav" > $tmp_dir/wav.flist
 n=`cat $tmp_dir/wav.flist | wc -l`
 
 
