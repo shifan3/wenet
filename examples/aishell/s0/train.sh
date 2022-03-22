@@ -1,0 +1,1 @@
+dockerrun --shm-size=2048m -d wenet-aishell-train bash -c 'sh startup.sh && bash run.sh 4 4 2>&1 | tee train.log && sleep 1000000'
