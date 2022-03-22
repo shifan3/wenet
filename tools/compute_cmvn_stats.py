@@ -51,12 +51,15 @@ class CollateFunc(object):
                 resample_rate = self.resample_rate
                 waveform = torchaudio.transforms.Resample(
                     orig_freq=sample_rate, new_freq=resample_rate)(waveform)
-
-            mat = kaldi.fbank(waveform,
-                              num_mel_bins=self.feat_dim,
-                              dither=0.0,
-                              energy_floor=0.0,
-                              sample_frequency=resample_rate)
+            try:
+                mat = kaldi.fbank(waveform,
+                                num_mel_bins=self.feat_dim,
+                                dither=0.0,
+                                energy_floor=0.0,
+                                sample_frequency=resample_rate)
+            except Exception:
+                print(wav_path)
+                raise
             mean_stat += torch.sum(mat, axis=0)
             var_stat += torch.sum(torch.square(mat), axis=0)
             number += mat.shape[0]
