@@ -164,7 +164,7 @@ def main():
                 if a[i] != '<':
                     return 1
                 for j in range(i+1, len(a)):
-                    if j == '>':
+                    if a[j] == '>':
                         return j - i + 1
                 return 1
             while i < len(a):
