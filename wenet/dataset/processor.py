@@ -399,8 +399,7 @@ def tokenize(data,
                 label.append(symbol_table[ch])
             elif '<unk>' in symbol_table:
                 label.append(symbol_table['<unk>'])
-        print(tokens)
-        print(label)
+
         sample['tokens'] = tokens
         sample['label'] = label
         yield sample
