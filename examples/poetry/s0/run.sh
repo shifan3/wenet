@@ -152,11 +152,13 @@ echo "stage 4: Training"
       --ddp.rank $rank \
       --ddp.dist_backend $dist_backend \
       --num_workers 1 \
+      --early_stop 20 \
       $cmvn_opts \
       --pin_memory
   } &
   done
   wait
+  cp $dict  exp/conformer/words.txt
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then

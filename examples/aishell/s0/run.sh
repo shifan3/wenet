@@ -164,6 +164,7 @@ echo "stage 4: Training"
   } &
   done
   wait
+  cp $dict  exp/conformer/words.txt
 fi
 
 if [ ${stage} -le 5 ] && [ ${stop_stage} -ge 5 ]; then

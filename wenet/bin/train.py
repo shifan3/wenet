@@ -48,6 +48,11 @@ def get_args():
                         type=int,
                         default=-1,
                         help='gpu id for this local rank, -1 for cpu')
+    parser.add_argument('--early_stop',
+                        dest='early_stop',
+                        default=0,
+                        type=int,
+                        help='if after this many step with no better loss, then stop')
     parser.add_argument('--model_dir', required=True, help='save model dir')
     parser.add_argument('--checkpoint', help='checkpoint model')
     parser.add_argument('--tensorboard_dir',
@@ -261,6 +266,8 @@ def main():
     if args.use_amp:
         scaler = torch.cuda.amp.GradScaler()
 
+    best_cv_loss = 100000
+    best_epoch = -1
     for epoch in range(start_epoch, num_epochs):
         train_dataset.set_epoch(epoch)
         configs['epoch'] = epoch
@@ -272,8 +279,13 @@ def main():
                                                 configs)
         cv_loss = total_loss / num_seen_utts
 
-        logging.info('Epoch {} CV info cv_loss {}'.format(epoch, cv_loss))
+        if best_epoch == -1 or cv_loss < best_cv_loss:
+            best_cv_loss = cv_loss
+            best_epoch = epoch
+            if args.rank == 0:
+                logging.info('Best Epoch {} CV info cv_loss {}'.format(epoch, cv_loss))
         if args.rank == 0:
+            logging.info('Epoch {} CV info cv_loss {}'.format(epoch, cv_loss))
             save_model_path = os.path.join(model_dir, '{}.pt'.format(epoch))
             save_checkpoint(
                 model, save_model_path, {
@@ -284,7 +296,11 @@ def main():
                 })
             writer.add_scalar('epoch/cv_loss', cv_loss, epoch)
             writer.add_scalar('epoch/lr', lr, epoch)
+        
         final_epoch = epoch
+        if args.early_stop > 0 and best_epoch >= 0 and epoch - best_epoch >= args.early_stop:
+            logging.info('{} epoches no imporve, early stop'.format(epoch - best_epoch))
+            break
 
     if final_epoch is not None and args.rank == 0:
         final_model_path = os.path.join(model_dir, 'final.pt')
