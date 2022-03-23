@@ -109,7 +109,7 @@ if [ ${stage} -le 3 ] && [ ${stop_stage} -ge 3 ]; then
         --num_threads 16 data/$x/wav.scp data/$x/text \
         $(realpath data/$x/shards) data/$x/data.list
     else
-      tools/make_raw_list.py data/$x/wav.scp data/$x/text \
+      tools/make_raw_list.py data/$x/wav.scp data/$x/tokenized_text \
         data/$x/data.list
     fi
   done
