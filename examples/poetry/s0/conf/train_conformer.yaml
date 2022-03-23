@@ -55,6 +55,7 @@ dataset_conf:
         max_t: 50
         max_f: 10
     shuffle: true
+    split_with_space: true
     shuffle_conf:
         shuffle_size: 1500
     sort: true
