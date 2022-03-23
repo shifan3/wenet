@@ -91,10 +91,8 @@ class Executor:
                         grad_norm = clip_grad_norm_(model.parameters(), clip)
                         if torch.isfinite(grad_norm):
                             optimizer.step()
-                    
-                    scheduler.step()
                     optimizer.zero_grad()
-                    
+                    scheduler.step()
                     self.step += 1
                 if batch_idx % log_interval == 0:
                     lr = optimizer.param_groups[0]['lr']
