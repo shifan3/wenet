@@ -142,7 +142,7 @@ echo "stage 4: Training"
     # the master of a worker.
     rank=$i
     
-    python3.7 wenet/bin/train.py --gpu $gpu_id \
+    MASTER_PORT=6666 MASTER_ADDRESS=127.0.0.1 python3.7 wenet/bin/train.py --gpu $gpu_id \
       --config $train_config \
       --data_type $data_type \
       --symbol_table $dict \
