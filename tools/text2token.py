@@ -157,6 +157,7 @@ def main():
                         for k in sp.encode_as_pieces(l):
                             a.append(k)
         elif args.trans_type == "token":
+            print('a1')
             i = 0
             a1 = []
             def fwd_n(a, i):
