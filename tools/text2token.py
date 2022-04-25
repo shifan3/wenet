@@ -72,7 +72,7 @@ def get_parser():
                         '-t',
                         type=str,
                         default="char",
-                        choices=["char", "phn", "cn_char_en_bpe"],
+                        choices=["char", "phn", "cn_char_en_bpe", "token"],
                         help="""Transcript type. char/phn. e.g., for TIMIT
                              FADG0_SI1279 -
                              If trans_type is char, read from
@@ -80,7 +80,10 @@ def get_parser():
                              Else if trans_type is phn,
                              read from SI1279.PHN file ->
                              "sil b r ih sil k s aa r er n aa l
-                             sil t er n ih sil t ih v sil" """)
+                             sil t er n ih sil t ih v sil" 
+                             if trans_type is token: basicly same as char,but treat <...>
+                             as one token
+                             """)
     return parser
 
 
@@ -153,6 +156,22 @@ def main():
                     else:
                         for k in sp.encode_as_pieces(l):
                             a.append(k)
+        elif args.trans_type == "token":
+            i = 0
+            a1 = []
+            def fwd_n(a, i):
+                if a[i] != '<':
+                    return 1
+                for j in range(i+1, len(a)):
+                    if a[j] == '>':
+                        return j - i + 1
+                return 1
+            while i < len(a):
+                for j in range(n):
+                    fwd = fwd_n(a, i)
+                    a1.append(a[i:i+fwd])
+                    i += fwd
+            a = a1
         else:
             a = [a[j:j + n] for j in range(0, len(a), n)]
 
